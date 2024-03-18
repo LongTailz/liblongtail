@@ -1,0 +1,3 @@
+[submodule "better-sqlite3-migrations"]
+	path = better-sqlite3-migrations
+	url = git@github.com:BlackGlory/better-sqlite3-migrations.git
