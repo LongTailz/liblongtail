@@ -1,7 +1,12 @@
 import {sqliteMigrations} from "./migrations.js";
 import {migrate as dbMigrate} from "./better-sqlite3-migrations/src/migrate.js";
 import betterSqlite from "better-sqlite3"
-import { ScalarType } from "./types.js";
+import { Nodex, ObjectType, Producer, ScalarType, Log, Sensor } from "./types.js";
+import DBObject from "./dbObject.js";
+import Nodex_Model from "./models/nodex.js";
+import Producer_Model from "./models/producer.js";
+import Log_Model from "./models/log.js";
+import Sensor_Model from "./models/sensor.js";
 
 const db = new betterSqlite('./dist/sqlite.db', { verbose: console.log });
 db.pragma('journal_mode = WAL');
@@ -13,13 +18,16 @@ const migrate = () => {
             return migrate_sqlite();
     }
 }
-const getByAll = (tableName: string,data: { [key: string]: ScalarType })=> { 
+const getByAll = (tableName: string,data: { [key: string]: ScalarType }):ObjectType=> { 
     console.log('doing getbyall');
+    let result:unknown;
     switch (dbType) { 
         case 'sqlite':
         default:
-            return getByAll_sqlite(tableName, data);
+            result=getByAll_sqlite(tableName, data);
+            break;
     }
+    return makeTyped(tableName, result);
 }
 const insert = (tableName: string, data: { [key: string]: string }) => { 
     switch (dbType) { 
@@ -27,6 +35,66 @@ const insert = (tableName: string, data: { [key: string]: string }) => {
         default:
             return insert_sqlite(tableName, data);
     } 
+}
+const getMine = (tableName: string, secretField: string|null): ObjectType[] => { 
+    switch (dbType) { 
+        case 'sqlite':
+        default:
+            return getMine_sqlite(tableName, secretField);
+    } 
+}
+
+const getMine_sqlite = (tableName: string, secretField: string|null): ObjectType[] => { 
+
+if (!secretField) secretField = 'secretKey';
+const result = db.prepare('SELECT * FROM `'+tableName+'` WHERE (`'+secretField+'` IS NOT NULL AND `'+secretField+'` != \'\')').all();
+if (!result || !result.length) return [];
+
+return getTypedRows(tableName, result);
+}
+
+const makeTyped = (tableName: string, row: unknown) => { 
+    return getTypedRows(tableName, [row])[0];
+}
+
+const getTypedRows = (tableName: string, result: unknown[]) => {
+    switch (tableName) { 
+        case Nodex_Model.tableName:
+            const ret1:Nodex_Model[] = [];
+            console.log('Building array of Nodex_Models')
+            for (const i of result) { 
+                ret1.push(new Nodex_Model(i as Nodex,false));
+            }
+            return ret1;
+        case Producer_Model.tableName:
+            const ret2:Producer_Model[] = [];
+            for (const i of result) { 
+                ret2.push(new Producer_Model(i as Producer,false));
+            }
+            return ret2;
+    
+        case Log_Model.tableName:
+            const ret3:Log_Model[] = [];
+            for (const i of result) { 
+                ret3.push(new Log_Model(i as Log,false))
+            }
+            return ret3;
+        
+        case Sensor_Model.tableName:
+            const ret4:Sensor_Model[] = [];
+            for (const i of result) { 
+                ret4.push(new Sensor_Model(i as Sensor, false ))
+            }
+            return ret4;
+        default:
+            const ret:ObjectType[] = [];
+            for (const i of result) { 
+                ret.push(i as ObjectType);
+            } 
+            return ret;
+                
+            
+        }
 }
 const migrate_sqlite = () => { 
     let databaseVersion = db.prepare('PRAGMA user_version;').get() as { user_version: number }
@@ -63,17 +131,18 @@ const getByAll_sqlite = (tableName: string, data: { [key: string]: ScalarType })
 
 const insert_sqlite = (tableName: string, data: { [key: string]: string }) => { 
     const temp = [];
-    const temp2 = [tableName];
+    const temp2 = [];
     const temp3 = [];
     for (const key in data) { 
         temp.push('`'+key+'`');
         temp2.push(data[key] || '');
         temp3.push('?');
     }
-    const result = db.prepare('insert into ? ('+temp.join(',')+') VALUES ('+temp3.join(',')+')').get(temp2);
-    console.log(result);
-    const insertResult = db.prepare('select last_insert_rowid()').get();
-    console.log(insertResult);
-    return result;
+    
+    const result = db.prepare('insert into '+tableName+' ('+temp.join(',')+') VALUES ('+temp3.join(',')+')').run(temp2);
+    if (!result.changes) { 
+        throw new Error('Failed to create SQLite row: '+JSON.stringify(result));
+    }
+    return result.lastInsertRowid;
 }
-export {migrate, getBy, getByAll, insert}
+export {migrate, getBy, getByAll, insert, getMine}

@@ -40,11 +40,11 @@ export type ScalarType =
     Float | 
     Double |
     Uint8 | Int8  |Uint16  | Int16  |Uint32 |Int32|Uint64 |Int64 
-
+export type ObjectType = Producer | Nodex | Sensor | Log | DBObject;
 export interface DBObject {
     [key: string]: any;
     //get: (...args: any)=>DBObject;
-    create: (data: { [key: string]: any })=>DBObject;
+    
 }
 export interface Producer extends DBObject {
     uid: UID;
@@ -52,14 +52,15 @@ export interface Producer extends DBObject {
     lastContactAt: Timestamp;
     name: string;
   };
-  export interface Nodex extends DBObject  {
+  export interface Nodex extends DBObject {
     publicKey: PublicKey;
     secretKey: SecretKey;
     displaySeed: DisplaySeed;
     serial: SerialNum;
     name: string;
     createdAt: Timestamp;
-  }
+    getSerial?: () => string;
+  };
 
   export interface NodexProducer extends DBObject  { 
     publicKey: PublicKey;
