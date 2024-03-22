@@ -1,5 +1,5 @@
 enum class SensorType {
-	NULL=0,
+	LM75=0,
 	DHT11=1,
 	DHT22=2,
 	SCD40=3,
