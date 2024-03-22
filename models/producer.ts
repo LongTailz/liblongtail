@@ -1,9 +1,9 @@
-import DBObject from "../dbObject";
-import { getByAll, insert } from '../db' 
+import DBObject from "../dbObject.js";
+import { getByAll, insert } from '../db.js' 
 import type { Nodex, Producer,
     Float, Double, Uint8, Int8, Uint16, Int16, Uint32, Int32, Uint64, Int64, ReadingType, ReadingUnit, Exponent,
-    PublicKey, SecretKey, DisplaySeed, SerialNum, Timestamp, UID, SensorIndex, Log } from '../types'
-export default class Producer_Model extends DBObject implements Producer { 
+    PublicKeyHash, SecretKey, DisplaySeed, SerialNum, Timestamp, UID, SensorIndex, Log } from '../types.js'
+export default class Producer_Model extends DBObject<Producer> implements Producer { 
     static tableName: string = 'producers';
     uid: UID;
     displaySeed: DisplaySeed;
@@ -17,8 +17,13 @@ export default class Producer_Model extends DBObject implements Producer {
         this.name = data.name;
         if (doInsert) insert(Producer_Model.tableName,data);
     }
-    get :any = (producerUid:any,idx:any) => { 
-        return getByAll(Producer_Model.tableName, {producerUid, idx} )
+
+    static get = (uid:any, publicKey:any=null):Producer_Model => { 
+        if (publicKey) { 
+            return Producer_Model.getByAll<Producer_Model>({uid, publicKey} )[0]
+        } else { 
+            return Producer_Model.getByAll<Producer_Model>({uid} )[0]
+        }
     } ;
     create:any = (data:any) => { 
         const result = insert(Producer_Model.tableName,data);

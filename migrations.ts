@@ -6,7 +6,7 @@ const sqliteMigrations:IMigration[] = [
         "up":`CREATE TABLE producers (
             uid TEXT NOT NULL PRIMARY KEY,
             displaySeed INTEGER default 0,
-            last_contact_at NUMBER default NULL,
+            lastContactAt NUMBER default NULL,
             name TEXT NOT NULL default ''
          );`,
          "down":""

@@ -1,7 +1,7 @@
 import {sqliteMigrations} from "./migrations.js";
-import {migrate as dbMigrate} from "./better-sqlite3-migrations/src/migrate.js";
+import {migrate as dbMigrate} from "@blackglory/better-sqlite3-migrations";
 import betterSqlite from "better-sqlite3"
-import { Nodex, ObjectType, Producer, ScalarType, Log, Sensor } from "./types.js";
+import { Nodex, ObjectType, Producer, ScalarType, Log, Sensor, LogTypes } from "./types.js";
 import DBObject from "./dbObject.js";
 import Nodex_Model from "./models/nodex.js";
 import Producer_Model from "./models/producer.js";
@@ -18,16 +18,16 @@ const migrate = () => {
             return migrate_sqlite();
     }
 }
-const getByAll = (tableName: string,data: { [key: string]: ScalarType }):ObjectType=> { 
+const getByAll = (tableName: string,data: { [key: string]: ScalarType }):any[]=> { 
     console.log('doing getbyall');
-    let result:unknown;
+    let result;
     switch (dbType) { 
         case 'sqlite':
         default:
-            result=getByAll_sqlite(tableName, data);
+            result = getByAll_sqlite(tableName, data);
             break;
     }
-    return makeTyped(tableName, result);
+    return result;
 }
 const insert = (tableName: string, data: { [key: string]: string }) => { 
     switch (dbType) { 
@@ -36,7 +36,7 @@ const insert = (tableName: string, data: { [key: string]: string }) => {
             return insert_sqlite(tableName, data);
     } 
 }
-const getMine = (tableName: string, secretField: string|null): ObjectType[] => { 
+const getMine = (tableName: string, secretField: string|null): any[] => { 
     switch (dbType) { 
         case 'sqlite':
         default:
@@ -44,7 +44,7 @@ const getMine = (tableName: string, secretField: string|null): ObjectType[] => {
     } 
 }
 
-const getMine_sqlite = (tableName: string, secretField: string|null): ObjectType[] => { 
+const getMine_sqlite = (tableName: string, secretField: string|null): any[] => { 
 
 if (!secretField) secretField = 'secretKey';
 const result = db.prepare('SELECT * FROM `'+tableName+'` WHERE (`'+secretField+'` IS NOT NULL AND `'+secretField+'` != \'\')').all();
@@ -73,13 +73,6 @@ const getTypedRows = (tableName: string, result: unknown[]) => {
             }
             return ret2;
     
-        case Log_Model.tableName:
-            const ret3:Log_Model[] = [];
-            for (const i of result) { 
-                ret3.push(new Log_Model(i as Log,false))
-            }
-            return ret3;
-        
         case Sensor_Model.tableName:
             const ret4:Sensor_Model[] = [];
             for (const i of result) { 
@@ -125,24 +118,30 @@ const getByAll_sqlite = (tableName: string, data: { [key: string]: ScalarType })
     }
     console.log('select * from ? WHERE '+temp.join(' AND ')+';');
     console.log(temp2);
-    const result = db.prepare('select * from '+tableName+' WHERE '+temp.join(' AND ')+';').get(temp2);
+    const result = db.prepare('select * from '+tableName+' WHERE '+temp.join(' AND ')+';').all(temp2);
+    return getTypedRows(tableName, result);
     return result;
 }
 
 const insert_sqlite = (tableName: string, data: { [key: string]: string }) => { 
-    const temp = [];
-    const temp2 = [];
-    const temp3 = [];
+    const temp:ScalarType[] = [];
+    const temp2:ScalarType[] = [];
+    const temp3:ScalarType[] = [];
     for (const key in data) { 
         temp.push('`'+key+'`');
-        temp2.push(data[key] || '');
+        let val = data[key];
+        if (typeof val == 'object' || typeof val == 'number') val = String(val);
+        temp2.push(val || '');
         temp3.push('?');
     }
-    
     const result = db.prepare('insert into '+tableName+' ('+temp.join(',')+') VALUES ('+temp3.join(',')+')').run(temp2);
+    
+    
     if (!result.changes) { 
         throw new Error('Failed to create SQLite row: '+JSON.stringify(result));
     }
     return result.lastInsertRowid;
+    
+   
 }
 export {migrate, getBy, getByAll, insert, getMine}
