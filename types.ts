@@ -117,7 +117,7 @@ export enum ReadingTypes {
     REF_ALT=4,
     REF_OFFSET=5,
     SENSOR=6,
-    SERIAL=7
+    SERIALNO=7
 }
 export type ReadingType = NumberValues<typeof ReadingTypes>;
 
