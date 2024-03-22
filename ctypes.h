@@ -23,7 +23,7 @@ enum class ReadingUnit {
 	METERS=4,
 	FEET=5,
 	SENSOR=6,
-	SERIAL=7,
+	SERIALNO=7,
 	HZ=8,
 	DB=9
 }
