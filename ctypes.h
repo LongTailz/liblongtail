@@ -4,8 +4,8 @@ enum class SensorType {
 	DHT22=2,
 	SCD40=3,
 	SCD41=4
-}
-enum class ReadingType {
+};
+enum class ReadingType:uint32_t {
 	TEMP=0,
 	HUMID=1,
 	CO2=2,
@@ -14,8 +14,8 @@ enum class ReadingType {
 	REF_OFFSET=5,
 	SENSOR=6,
 	SERIALNO=7
-}
-enum class ReadingUnit {
+};
+enum class ReadingUnit:uint32_t {
 	CELSIUS=0,
 	FAHRENHEIT=1,
 	PERCENT=2,
@@ -26,4 +26,4 @@ enum class ReadingUnit {
 	SERIALNO=7,
 	HZ=8,
 	DB=9
-}
+};

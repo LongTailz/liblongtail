@@ -10,10 +10,10 @@ import fs from 'fs';
         }
     }
     fp.write(vals.join(',\r\n')+'\r\n');
-    fp.write('}\r\n');
+    fp.write('};\r\n');
 
     //
-    fp.write("enum class ReadingType {\r\n");
+    fp.write("enum class ReadingType:uint32_t {\r\n");
     vals = [];
     for (const type in Object.keys(types.ReadingTypes)) {
         if (types.ReadingTypes[type]) { 
@@ -21,10 +21,10 @@ import fs from 'fs';
         }
     }
     fp.write(vals.join(',\r\n')+'\r\n');
-    fp.write('}\r\n');
+    fp.write('};\r\n');
 
        //
-       fp.write("enum class ReadingUnit {\r\n");
+       fp.write("enum class ReadingUnit:uint32_t {\r\n");
        vals = [];
        for (const type in Object.keys(types.ReadingUnits)) {
            if (types.ReadingUnits[type]) { 
@@ -32,7 +32,7 @@ import fs from 'fs';
            }
        }
        fp.write(vals.join(',\r\n')+'\r\n');
-       fp.write('}\r\n');
+       fp.write('};\r\n');
     
     fp.close();
     console.log('got here');
