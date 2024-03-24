@@ -22,6 +22,12 @@ export default class Log_Model<T extends LogTypes> extends DBObject<LogAny<T>> i
         this.createdAt = data.createdAt;
         this.producerUid = data.producerUid;
         this.publicKey = data.publicKey;
+        if (typeof data.sensorIdx == 'string') { 
+            data.sensorIdx=Number(data.sensorIdx) as SensorIndex;
+        }
+        if (typeof data.exponent == 'string') { 
+            data.exponent=Number(data.exponent) as Exponent;
+        }
         this.sensorIdx = data.sensorIdx;
         this.value = data.value;
         this.readingType = data.readingType;
@@ -40,13 +46,9 @@ export default class Log_Model<T extends LogTypes> extends DBObject<LogAny<T>> i
         }
         let sensor = Sensor_Model.get(producer.uid,idx)
         if (!sensor) { 
-            console.log('No sensor found, creating new sensor');
+            
             sensor = new Sensor_Model({producerUid: producer.uid, idx, type: 1 , serial: "0", name:'' })
             
-        } else { 
-            console.log('Sensor found');
-            console.log(sensor);
-            console.log(typeof sensor.type)
         }
         console.log(producer);
         var build = {readingType: type, readingUnit: unit, value: val, sensorIdx: idx, exponent: exp, producerUid: uid,publicKey: '0', createdAt: Date.now()  };
@@ -66,7 +68,26 @@ export default class Log_Model<T extends LogTypes> extends DBObject<LogAny<T>> i
             case 'int8':
                 n=new Log_Model<Int8>(build, ctype);
                 break;
+            case 'uint16':
+                n=new Log_Model<Uint16>(build, ctype);
+                break;
+            case 'int16':
+                n=new Log_Model<Int16>(build, ctype);
+                break;
+            case 'uint32':
+                n=new Log_Model<Uint32>(build, ctype);
+                break;
+            case 'int32':
+                n=new Log_Model<Int32>(build, ctype);
+                break;
+            case 'uint64':
+                n=new Log_Model<Uint64>(build, ctype);
+                break;
+            case 'int64':
+                n=new Log_Model<Int64>(build, ctype);
+                break;
         }
+        
 
     }
     get :any = (producerUid: any,idx: any) => { 

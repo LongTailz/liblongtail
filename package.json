@@ -2,7 +2,7 @@
   "name": "liblongtail",
   "version": "1.0.0",
   "description": "",
-  "type":"module",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "ctypes": "tsc && node dist/ctypes.js",
@@ -11,6 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@blackglory/better-sqlite3-migrations": "^0.1.18"
+    "@blackglory/better-sqlite3-migrations": "^0.1.18",
+    "@types/node": "^20.11.30",
+    "bip39": "^3.1.0",
+    "blake2": "^5.0.0",
+    "fs": "^0.0.1-security",
+    "lucid-cardano": "^0.10.7"
   }
 }

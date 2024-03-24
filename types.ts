@@ -55,6 +55,7 @@ export interface Hash224 {
   type: HashType,
   buf: HashBuffer<28>,
   toString(): string;
+  toJSON(): object;
 }
 
 
@@ -86,6 +87,9 @@ export class PublicKeyHash implements Hash224 {
     const bufStr = Buffer.from(this.buf);
     
     return bufStr.toString('hex');
+  }
+  public toJSON = () : object => { 
+    return {hash: this.toString(), type: this.type}
   }
 }
 export type SecretKey = string;
